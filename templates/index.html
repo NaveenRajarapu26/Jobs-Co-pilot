@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+  <div class="col-lg-10 mx-auto">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h3 class="mb-2">Generate tailored application materials</h3>
+        <p class="text-muted mb-4">Upload your resume + provide a JD URL (or paste JD text).</p>
+
+        <form action="{{ url_for('run_agent') }}" method="POST" enctype="multipart/form-data">
+          <h5>Your info</h5>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Name</label>
+              <input name="name" class="form-control" value="Naveen"/>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Headline</label>
+              <input name="headline" class="form-control" placeholder="MS in AI | ML Engineer"/>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Location</label>
+              <input name="location" class="form-control" placeholder="Detroit, MI"/>
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <label class="form-label">Constraints</label>
+            <input name="constraints" class="form-control" placeholder="F1-OPT, open to relocation"/>
+          </div>
+
+          <div class="mt-3">
+            <label class="form-label">Skills (comma-separated)</label>
+            <input name="skills" class="form-control" placeholder="Python, PyTorch, TensorFlow, AWS, SQL"/>
+          </div>
+
+          <hr class="my-4"/>
+
+          <h5>Resume upload</h5>
+          <div class="mt-2">
+            <input type="file" name="resume_file" class="form-control" required />
+            <small class="text-muted">PDF/DOCX/TXT supported.</small>
+          </div>
+
+          <hr class="my-4"/>
+
+          <h5>Job details</h5>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Job Title</label>
+              <input name="job_title" class="form-control" required />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Company</label>
+              <input name="job_company" class="form-control" required />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Job Location</label>
+              <input name="job_location" class="form-control" />
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <label class="form-label">Job URL (optional but recommended)</label>
+            <input name="job_url" class="form-control" placeholder="https://..."/>
+            <small class="text-muted">Some sites may block fetching (LinkedIn often does). If so, paste JD below.</small>
+          </div>
+
+          <div class="mt-3">
+            <label class="form-label">Job Description (paste here if URL fails)</label>
+            <textarea name="job_description" class="form-control" rows="6"></textarea>
+          </div>
+
+          <div class="mt-3">
+            <label class="form-label">Application questions (optional, one per line)</label>
+            <textarea name="questions" class="form-control" rows="4"></textarea>
+          </div>
+
+          <div class="mt-4 text-end">
+            <button class="btn btn-primary">Run Agent</button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
