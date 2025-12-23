@@ -1,59 +1,142 @@
 {% extends "base.html" %}
 {% block content %}
+
 <div class="d-flex justify-content-between align-items-center mb-3">
   <div>
     <h3 class="mb-0">{{ job.title }} @ {{ job.company }}</h3>
     <div class="text-muted">{{ job.location }}</div>
+    {% if job.source_url %}
+      <div class="small"><a href="{{ job.source_url }}" target="_blank" rel="noopener">Open job URL</a></div>
+    {% endif %}
   </div>
   <a class="btn btn-outline-secondary" href="{{ url_for('index') }}">New</a>
 </div>
 
-<div class="row g-3">
+<div class="row g-3 mb-3">
   <div class="col-md-4">
-    <div class="card border-success">
+    <div class="card border-success shadow-sm">
       <div class="card-body">
-        <h5 class="mb-1">Fit score</h5>
-        <div class="display-6">{{ result.fit.score }}/100</div>
-        <div class="fw-bold">{{ result.fit.level }}</div>
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted">Fit score</div>
+            <div class="display-6">{{ result.fit.score }}/100</div>
+            <div class="fw-bold">{{ result.fit.level }}</div>
+          </div>
+          <div class="badge bg-success-subtle text-success border border-success-subtle p-2">v1.1</div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<div class="mt-3">
-  <h5>Reasons</h5>
-  <ul>
-    {% for r in result.fit.reasons %}
-      <li>{{ r }}</li>
-    {% endfor %}
-  </ul>
+<ul class="nav nav-tabs" id="resultTabs" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-fit" type="button" role="tab">Fit</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-job" type="button" role="tab">Job parsed</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-resume" type="button" role="tab">Resume bullets</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-cover" type="button" role="tab">Cover letter</button>
+  </li>
+  {% if result.qna %}
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-qna" type="button" role="tab">Q&amp;A</button>
+  </li>
+  {% endif %}
+</ul>
 
-  <h5>Gaps</h5>
-  <ul>
-    {% for g in result.fit.gaps %}
-      <li>{{ g }}</li>
-    {% endfor %}
-  </ul>
+<div class="tab-content bg-white border border-top-0 rounded-bottom p-3 shadow-sm" id="resultTabContent">
+
+  <!-- FIT TAB -->
+  <div class="tab-pane fade show active" id="tab-fit" role="tabpanel">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <h5>Top reasons</h5>
+        <ul class="mb-0">
+          {% for r in result.fit.reasons %}
+            <li>{{ r }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <h5>Gaps</h5>
+        <ul class="mb-0">
+          {% for g in result.fit.gaps %}
+            <li>{{ g }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- JOB PARSED TAB -->
+  <div class="tab-pane fade" id="tab-job" role="tabpanel">
+    <div class="d-flex justify-content-end mb-2">
+      <button class="btn btn-sm btn-outline-primary" onclick="copyFrom('jobParsed')">Copy</button>
+    </div>
+    <pre id="jobParsed" class="p-3 border rounded bg-soft" style="white-space: pre-wrap;">{{ result.job_parsed_markdown }}</pre>
+  </div>
+
+  <!-- RESUME TAB -->
+  <div class="tab-pane fade" id="tab-resume" role="tabpanel">
+    <div class="d-flex justify-content-end mb-2">
+      <button class="btn btn-sm btn-outline-primary" onclick="copyFrom('resumeBullets')">Copy</button>
+    </div>
+    <pre id="resumeBullets" class="p-3 border rounded bg-soft" style="white-space: pre-wrap;">{{ result.tailored_resume_md }}</pre>
+  </div>
+
+  <!-- COVER LETTER TAB -->
+  <div class="tab-pane fade" id="tab-cover" role="tabpanel">
+    <div class="d-flex justify-content-end mb-2">
+      <button class="btn btn-sm btn-outline-primary" onclick="copyFrom('coverLetter')">Copy</button>
+    </div>
+    <pre id="coverLetter" class="p-3 border rounded bg-soft" style="white-space: pre-wrap;">{{ result.cover_letter }}</pre>
+  </div>
+
+  <!-- QNA TAB -->
+  {% if result.qna %}
+  <div class="tab-pane fade" id="tab-qna" role="tabpanel">
+    <div class="d-flex justify-content-end mb-2">
+      <button class="btn btn-sm btn-outline-primary" onclick="copyFrom('qnaText')">Copy</button>
+    </div>
+    <pre id="qnaText" class="p-3 border rounded bg-soft" style="white-space: pre-wrap;">{{ result.qna }}</pre>
+  </div>
+  {% endif %}
+
 </div>
 
-<hr class="my-4"/>
+<script>
+  async function copyFrom(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const text = el.innerText;
+    try {
+      await navigator.clipboard.writeText(text);
+      toast("Copied ✅");
+    } catch (e) {
+      // fallback
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+      toast("Copied ✅");
+    }
+  }
 
-<h4>Job parsed</h4>
-<pre class="p-3 bg-white border rounded" style="white-space: pre-wrap;">{{ result.job_parsed_markdown }}</pre>
+  function toast(msg) {
+    const t = document.createElement("div");
+    t.className = "toast-lite";
+    t.innerText = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.classList.add("show"), 10);
+    setTimeout(() => { t.classList.remove("show"); setTimeout(() => t.remove(), 250); }, 1300);
+  }
+</script>
 
-<hr class="my-4"/>
-
-<h4>Tailored resume bullets</h4>
-<pre class="p-3 bg-white border rounded" style="white-space: pre-wrap;">{{ result.tailored_resume_md }}</pre>
-
-<hr class="my-4"/>
-
-<h4>Cover letter</h4>
-<pre class="p-3 bg-white border rounded" style="white-space: pre-wrap;">{{ result.cover_letter }}</pre>
-
-{% if result.qna %}
-<hr class="my-4"/>
-<h4>Application Q&amp;A</h4>
-<pre class="p-3 bg-white border rounded" style="white-space: pre-wrap;">{{ result.qna }}</pre>
-{% endif %}
 {% endblock %}

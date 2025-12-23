@@ -1,1 +1,21 @@
 pre { font-size: 0.95rem; }
+.bg-soft { background: #f8fafc; }
+
+.toast-lite{
+  position: fixed;
+  bottom: 18px;
+  right: 18px;
+  background: rgba(0,0,0,0.85);
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: 0.2s ease;
+  z-index: 9999;
+}
+.toast-lite.show{
+  opacity: 1;
+  transform: translateY(0);
+}
