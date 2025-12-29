@@ -12,3 +12,7 @@ python-docx
 langchain
 langchain-groq
 langgraph
+
+flask_sqlalchemy
+flask_migrate
+psycopg2-binary
