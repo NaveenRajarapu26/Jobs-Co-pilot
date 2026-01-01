@@ -1,42 +1,83 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h3 class="mb-0">My Applications</h3>
-  <a class="btn btn-outline-secondary" href="{{ url_for('index') }}">New</a>
-</div>
 
-<div class="card shadow-sm">
-  <div class="card-body">
-    {% if not apps %}
-      <div class="text-muted">No applications yet. Run the agent once.</div>
-    {% else %}
-      <div class="table-responsive">
-        <table class="table align-middle">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Role</th>
-              <th>Company</th>
-              <th>Score</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for a in apps %}
-              <tr>
-                <td class="text-muted">{{ a.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
-                <td>{{ a.job_title }}</td>
-                <td>{{ a.job_company }}</td>
-                <td><span class="badge bg-secondary">{{ a.fit_score }}/100</span></td>
-                <td class="text-end">
-                  <a class="btn btn-sm btn-outline-primary" href="{{ url_for('application_detail', app_id=a.id) }}">View</a>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% endif %}
+<div class="hero mb-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div>
+      <h2 class="section-title mb-1">My Applications</h2>
+      <div class="subtle">All your generated runs in one place.</div>
+    </div>
+    <a class="btn btn-outline-light" href="/">+ New</a>
   </div>
 </div>
+
+<div class="card">
+  <div class="card-body table-responsive">
+
+    {% if not apps %}
+      <div class="p-3">
+        <div class="subtle">No applications yet.</div>
+        <div class="mt-2">
+          <a class="btn btn-primary" href="/">Run the agent</a>
+        </div>
+      </div>
+    {% else %}
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th style="width: 170px;">Date</th>
+            <th>Role</th>
+            <th>Company</th>
+            <th style="width: 110px;">Score</th>
+            <th style="width: 90px;" class="text-end">View</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in apps %}
+          <tr>
+            <td class="subtle">{{ a.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+
+            <td class="fw-semibold">
+              {{ a.job_title or "—" }}
+              {% if a.job_location %}
+                <div class="subtle small">{{ a.job_location }}</div>
+              {% endif %}
+            </td>
+
+            <td>
+              {{ a.job_company or "—" }}
+              {% if a.job_url %}
+                <div class="small">
+                  <a class="subtle" href="{{ a.job_url }}" target="_blank">Job link ↗</a>
+                </div>
+              {% endif %}
+            </td>
+
+            <td>
+              {% if a.fit_score is not none %}
+                {% set score = a.fit_score|int %}
+                {% if score >= 75 %}
+                  <span class="badge badge-approved">{{ score }}/100</span>
+                {% elif score >= 45 %}
+                  <span class="badge badge-pending">{{ score }}/100</span>
+                {% else %}
+                  <span class="badge badge-blocked">{{ score }}/100</span>
+                {% endif %}
+              {% else %}
+                <span class="badge badge-soft">—</span>
+              {% endif %}
+            </td>
+
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-light" href="/applications/{{ a.id }}">View</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+
+  </div>
+</div>
+
 {% endblock %}

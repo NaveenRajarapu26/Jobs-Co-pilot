@@ -1,141 +1,233 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <div>
-    <h3 class="mb-0">{{ job.title }} @ {{ job.company }}</h3>
-    <div class="text-muted">{{ job.location }}</div>
-    {% if job.source_url %}
-      <div class="small"><a href="{{ job.source_url }}" target="_blank" rel="noopener">Open job URL</a></div>
-    {% endif %}
+{% set fit = result.get("fit", {}) %}
+{% set score = fit.get("score") %}
+{% set level = fit.get("level") %}
+{% set reasons = fit.get("reasons", []) %}
+{% set gaps = fit.get("gaps", []) %}
+
+<div class="hero mb-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+    <div>
+      <h2 class="section-title mb-1">
+        {{ job.get("title","Role") }} {% if job.get("company") %}<span class="subtle">@ {{ job.get("company") }}</span>{% endif %}
+      </h2>
+      <div class="subtle">
+        {% if job.get("location") %}{{ job.get("location") }} • {% endif %}
+        {% if job.get("source_url") %}<a class="subtle" href="{{ job.get('source_url') }}" target="_blank">Open job ↗</a>{% endif %}
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-light" href="/applications">Back</a>
+      <a class="btn btn-primary" href="/">New run</a>
+    </div>
   </div>
-  <a class="btn btn-outline-secondary" href="{{ url_for('index') }}">New</a>
 </div>
 
 <div class="row g-3 mb-3">
-  <div class="col-md-4">
-    <div class="card border-success shadow-sm">
+  <div class="col-lg-4">
+    <div class="card h-100">
       <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <div class="text-muted">Fit score</div>
-            <div class="display-6">{{ result.fit.score }}/100</div>
-            <div class="fw-bold">{{ result.fit.level }}</div>
+        <div class="subtle">Fit score</div>
+
+        {% if score is not none %}
+          {% set s = score|int %}
+          <div class="display-4 fw-bold mb-1">{{ s }}/100</div>
+          <div class="d-flex align-items-center gap-2">
+            {% if s >= 75 %}
+              <span class="badge badge-approved">{{ level or "Strong Fit" }}</span>
+            {% elif s >= 45 %}
+              <span class="badge badge-pending">{{ level or "Moderate Fit" }}</span>
+            {% else %}
+              <span class="badge badge-blocked">{{ level or "Weak Fit" }}</span>
+            {% endif %}
+            <span class="badge badge-soft">v1.1</span>
           </div>
-          <div class="badge bg-success-subtle text-success border border-success-subtle p-2">v1.1</div>
+        {% else %}
+          <div class="display-6 fw-bold">—</div>
+          <div class="subtle">No score generated.</div>
+        {% endif %}
+
+        <hr class="my-3" />
+        <div class="subtle small">
+          Tip: Use the copy buttons in each tab to quickly paste into docs.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <h5 class="mb-2">Top reasons</h5>
+            {% if reasons and reasons|length > 0 %}
+              <ul class="mb-0">
+                {% for r in reasons %}
+                  <li class="mb-1">{{ r }}</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <div class="subtle">No reasons found.</div>
+            {% endif %}
+          </div>
+          <div class="col-md-6">
+            <h5 class="mb-2">Gaps</h5>
+            {% if gaps and gaps|length > 0 %}
+              <ul class="mb-0">
+                {% for g in gaps %}
+                  <li class="mb-1">{{ g }}</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <div class="subtle">No major gaps detected.</div>
+            {% endif %}
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<ul class="nav nav-tabs" id="resultTabs" role="tablist">
-  <li class="nav-item" role="presentation">
-    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-fit" type="button" role="tab">Fit</button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-job" type="button" role="tab">Job parsed</button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-resume" type="button" role="tab">Resume bullets</button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-cover" type="button" role="tab">Cover letter</button>
-  </li>
-  {% if result.qna %}
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-qna" type="button" role="tab">Q&amp;A</button>
-  </li>
-  {% endif %}
-</ul>
+<div class="card">
+  <div class="card-body">
 
-<div class="tab-content bg-white border border-top-0 rounded-bottom p-3 shadow-sm" id="resultTabContent">
+    <ul class="nav nav-pills gap-2 mb-3" id="resultTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tab-fit" type="button">Fit</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-job" type="button">Job parsed</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-resume" type="button">Resume bullets</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-cover" type="button">Cover letter</button>
+      </li>
+      {% if result.get("qna") %}
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-qna" type="button">Q&A</button>
+      </li>
+      {% endif %}
+    </ul>
 
-  <!-- FIT TAB -->
-  <div class="tab-pane fade show active" id="tab-fit" role="tabpanel">
-    <div class="row g-3">
-      <div class="col-md-6">
-        <h5>Top reasons</h5>
-        <ul class="mb-0">
-          {% for r in result.fit.reasons %}
-            <li>{{ r }}</li>
-          {% endfor %}
-        </ul>
+    <div class="tab-content">
+
+      <!-- Fit -->
+      <div class="tab-pane fade show active" id="tab-fit">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="subtle mb-2">Reasons</div>
+            <div class="card">
+              <div class="card-body">
+                {% if reasons and reasons|length > 0 %}
+                  <ul class="mb-0">
+                    {% for r in reasons %}<li class="mb-1">{{ r }}</li>{% endfor %}
+                  </ul>
+                {% else %}
+                  <div class="subtle">No reasons found.</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="subtle mb-2">Gaps</div>
+            <div class="card">
+              <div class="card-body">
+                {% if gaps and gaps|length > 0 %}
+                  <ul class="mb-0">
+                    {% for g in gaps %}<li class="mb-1">{{ g }}</li>{% endfor %}
+                  </ul>
+                {% else %}
+                  <div class="subtle">No major gaps detected.</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="col-md-6">
-        <h5>Gaps</h5>
-        <ul class="mb-0">
-          {% for g in result.fit.gaps %}
-            <li>{{ g }}</li>
-          {% endfor %}
-        </ul>
+
+      <!-- Job parsed -->
+      <div class="tab-pane fade" id="tab-job">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="subtle">Structured notes extracted from the JD</div>
+          <button class="btn btn-sm btn-outline-light" type="button" onclick="copyText('jobParsed')">Copy</button>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <pre id="jobParsed" class="mb-0" style="white-space: pre-wrap; color: inherit;">
+{{ result.get("job_parsed_markdown") or "No parsed job markdown available." }}
+            </pre>
+          </div>
+        </div>
       </div>
+
+      <!-- Resume bullets -->
+      <div class="tab-pane fade" id="tab-resume">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="subtle">Tailored bullets / resume snippets</div>
+          <button class="btn btn-sm btn-outline-light" type="button" onclick="copyText('resumeBullets')">Copy</button>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <pre id="resumeBullets" class="mb-0" style="white-space: pre-wrap; color: inherit;">
+{{ result.get("tailored_resume_md") or "No tailored resume output available." }}
+            </pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cover letter -->
+      <div class="tab-pane fade" id="tab-cover">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="subtle">Cover letter draft</div>
+          <button class="btn btn-sm btn-outline-light" type="button" onclick="copyText('coverLetter')">Copy</button>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <pre id="coverLetter" class="mb-0" style="white-space: pre-wrap; color: inherit;">
+{{ result.get("cover_letter") or "No cover letter available." }}
+            </pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- QNA -->
+      {% if result.get("qna") %}
+      <div class="tab-pane fade" id="tab-qna">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="subtle">Answers to application questions</div>
+          <button class="btn btn-sm btn-outline-light" type="button" onclick="copyText('qnaBlock')">Copy</button>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <pre id="qnaBlock" class="mb-0" style="white-space: pre-wrap; color: inherit;">
+{{ result.get("qna") }}
+            </pre>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
     </div>
   </div>
-
-  <!-- JOB PARSED TAB -->
-  <div class="tab-pane fade" id="tab-job" role="tabpanel">
-    <div class="d-flex justify-content-end mb-2">
-      <button class="btn btn-sm btn-outline-primary" onclick="copyFrom('jobParsed')">Copy</button>
-    </div>
-    <pre id="jobParsed" class="p-3 border rounded bg-soft" style="white-space: pre-wrap;">{{ result.job_parsed_markdown }}</pre>
-  </div>
-
-  <!-- RESUME TAB -->
-  <div class="tab-pane fade" id="tab-resume" role="tabpanel">
-    <div class="d-flex justify-content-end mb-2">
-      <button class="btn btn-sm btn-outline-primary" onclick="copyFrom('resumeBullets')">Copy</button>
-    </div>
-    <pre id="resumeBullets" class="p-3 border rounded bg-soft" style="white-space: pre-wrap;">{{ result.tailored_resume_md }}</pre>
-  </div>
-
-  <!-- COVER LETTER TAB -->
-  <div class="tab-pane fade" id="tab-cover" role="tabpanel">
-    <div class="d-flex justify-content-end mb-2">
-      <button class="btn btn-sm btn-outline-primary" onclick="copyFrom('coverLetter')">Copy</button>
-    </div>
-    <pre id="coverLetter" class="p-3 border rounded bg-soft" style="white-space: pre-wrap;">{{ result.cover_letter }}</pre>
-  </div>
-
-  <!-- QNA TAB -->
-  {% if result.qna %}
-  <div class="tab-pane fade" id="tab-qna" role="tabpanel">
-    <div class="d-flex justify-content-end mb-2">
-      <button class="btn btn-sm btn-outline-primary" onclick="copyFrom('qnaText')">Copy</button>
-    </div>
-    <pre id="qnaText" class="p-3 border rounded bg-soft" style="white-space: pre-wrap;">{{ result.qna }}</pre>
-  </div>
-  {% endif %}
-
 </div>
 
 <script>
-  async function copyFrom(id) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const text = el.innerText;
+  async function copyText(elementId) {
     try {
+      const el = document.getElementById(elementId);
+      const text = el ? el.innerText : "";
       await navigator.clipboard.writeText(text);
-      toast("Copied ✅");
+      alert("Copied to clipboard ✅");
     } catch (e) {
-      // fallback
-      const ta = document.createElement("textarea");
-      ta.value = text;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      ta.remove();
-      toast("Copied ✅");
+      alert("Copy failed. You can manually select and copy.");
     }
-  }
-
-  function toast(msg) {
-    const t = document.createElement("div");
-    t.className = "toast-lite";
-    t.innerText = msg;
-    document.body.appendChild(t);
-    setTimeout(() => t.classList.add("show"), 10);
-    setTimeout(() => { t.classList.remove("show"); setTimeout(() => t.remove(), 250); }, 1300);
   }
 </script>
 

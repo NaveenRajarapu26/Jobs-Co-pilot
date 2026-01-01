@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card hero-card shadow-sm">
+  <div class="card-body p-4">
+    <h1 class="mb-2 fw-bold">Apply smarter. Faster. With an Agent.</h1>
+    <p class="mb-4 text-muted">
+      Upload your resume, paste a job description, and generate tailored materials in minutes:
+      fit score, resume bullets, and a cover letter.
+    </p>
+
+    <div class="d-flex flex-wrap gap-2">
+      {% if session.get("user_id") %}
+        <a class="btn btn-primary" href="{{ url_for('index') }}">Open App</a>
+        <a class="btn btn-outline-light" href="{{ url_for('applications') }}">View Applications</a>
+      {% else %}
+        <a class="btn btn-primary" href="{{ url_for('signup') }}">Get started</a>
+        <a class="btn btn-outline-light" href="{{ url_for('login') }}">Login</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mt-3">
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="fw-bold">Fit Score</h5>
+        <p class="text-muted mb-0">Get an instant match score + reasons + gaps.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="fw-bold">Tailored Resume Bullets</h5>
+        <p class="text-muted mb-0">Rewrite bullets aligned to the role’s requirements.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="fw-bold">Cover Letter</h5>
+        <p class="text-muted mb-0">A clean, personalized letter ready to send.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

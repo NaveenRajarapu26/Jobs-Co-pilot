@@ -1,26 +1,46 @@
 {% extends "base.html" %}
 {% block content %}
+
 <div class="row">
   <div class="col-lg-10 mx-auto">
-    <div class="card shadow-sm">
+
+    <div class="hero mb-4">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+          <h2 class="section-title mb-1">Generate tailored application materials</h2>
+          <div class="subtle">Upload your resume + provide a JD URL (or paste JD text).</div>
+        </div>
+
+        <div class="text-end">
+          {% if session.get("user_status") == "pending" and not session.get("is_admin") %}
+            <span class="badge badge-pending">Pending approval — Run disabled</span>
+          {% elif session.get("user_status") == "blocked" and not session.get("is_admin") %}
+            <span class="badge badge-blocked">Blocked — contact admin</span>
+          {% else %}
+            <span class="badge badge-approved">Ready</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
       <div class="card-body">
-        <h3 class="mb-2">Generate tailored application materials</h3>
-        <p class="text-muted mb-4">Upload your resume + provide a JD URL (or paste JD text).</p>
 
         <form action="{{ url_for('run_agent') }}" method="POST" enctype="multipart/form-data">
-          <h5>Your info</h5>
+          <h5 class="mb-3">Your info</h5>
+
           <div class="row g-3">
             <div class="col-md-4">
               <label class="form-label">Name</label>
-              <input name="name" class="form-control" value="Naveen"/>
+              <input name="name" class="form-control" value="Your Name"/>
             </div>
             <div class="col-md-4">
               <label class="form-label">Headline</label>
-              <input name="headline" class="form-control" placeholder="MS in AI | ML Engineer"/>
+              <input name="headline" class="form-control" placeholder="Eg: MS in AI | ML Engineer "/>
             </div>
             <div class="col-md-4">
               <label class="form-label">Location</label>
-              <input name="location" class="form-control" placeholder="Detroit, MI"/>
+              <input name="location" class="form-control" placeholder="Eg: Detroit, MI"/>
             </div>
           </div>
 
@@ -31,39 +51,45 @@
 
           <div class="mt-3">
             <label class="form-label">Skills (comma-separated)</label>
-            <input name="skills" class="form-control" placeholder="Python, PyTorch, TensorFlow, AWS, SQL"/>
+            <input name="skills" class="form-control" placeholder="Eg: Python, PyTorch, TensorFlow, AWS, SQL"/>
           </div>
 
           <hr class="my-4"/>
 
-          <h5>Resume upload</h5>
+          <h5 class="mb-2">Resume upload</h5>
           <div class="mt-2">
             <input type="file" name="resume_file" class="form-control" required />
-            <small class="text-muted">PDF/DOCX/TXT supported.</small>
+            <small class="subtle">PDF/DOCX/TXT supported.</small>
           </div>
 
           <hr class="my-4"/>
 
-          <h5>Job details</h5>
+          <h5 class="mb-2">Job details</h5>
           <div class="row g-3">
             <div class="col-md-4">
-              <label class="form-label">Job Title</label>
-              <input name="job_title" class="form-control" required />
+              
+              <label class="form-label">Job Title <span class="subtle">(optional)</span></label>
+              
+
+
+              <input name="job_title" class="form-control"  />
             </div>
             <div class="col-md-4">
               <label class="form-label">Company</label>
+              
+
               <input name="job_company" class="form-control" required />
             </div>
             <div class="col-md-4">
-              <label class="form-label">Job Location</label>
+              <label class="form-label">Job Location<span class="subtle">(optional)</span></label>
               <input name="job_location" class="form-control" />
             </div>
           </div>
 
           <div class="mt-3">
-            <label class="form-label">Job URL (optional but recommended)</label>
+            <label class="form-label">Job URL (If url fails paste the JD down)</label>
             <input name="job_url" class="form-control" placeholder="https://..."/>
-            <small class="text-muted">Some sites may block fetching (LinkedIn often does). If so, paste JD below.</small>
+            <small class="subtle">Some sites may block fetching (LinkedIn often does). If so, paste JD below.</small>
           </div>
 
           <div class="mt-3">
@@ -76,18 +102,22 @@
             <textarea name="questions" class="form-control" rows="4"></textarea>
           </div>
 
-          <div class="mt-4 text-end">
-            
-            <button id="runBtn" class="btn btn-primary" type="submit">
-              <span id="runBtnText">Run Agent</span>
+          <div class="mt-4 d-flex justify-content-between align-items-center">
+            <div class="subtle small">
+              Tip: paste the JD if URL fetch fails.
+            </div>
+
+            {% set can_run = (session.get("is_admin") or session.get("user_status") == "approved") %}
+            <button id="runBtn" class="btn btn-primary" type="submit" {% if not can_run %}disabled{% endif %}>
+              <span id="runBtnText">{% if can_run %}Run Agent{% else %}Awaiting approval{% endif %}</span>
               <span id="runSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
             </button>
-
           </div>
         </form>
 
       </div>
     </div>
+
   </div>
 </div>
 {% endblock %}

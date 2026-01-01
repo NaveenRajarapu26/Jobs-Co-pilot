@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 class="section-title mb-3">Admin — Users</h2>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body">
+        <div class="subtle">Total Users</div>
+        <div class="display-6 fw-bold">{{ stats.total_users }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body">
+        <div class="subtle">Pending Approvals</div>
+        <div class="display-6 fw-bold">{{ stats.pending_users }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body">
+        <div class="subtle">Total Applications</div>
+        <div class="display-6 fw-bold">{{ stats.total_apps }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Status</th>
+          <th>Admin</th>
+          <th>Created</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td class="fw-semibold">{{ u.email }}</td>
+
+          <td>
+            {% if u.is_admin %}
+              <span class="badge badge-admin">admin</span>
+            {% elif u.status == "approved" %}
+              <span class="badge badge-approved">approved</span>
+            {% elif u.status == "pending" %}
+              <span class="badge badge-pending">pending</span>
+            {% else %}
+              <span class="badge badge-blocked">blocked</span>
+            {% endif %}
+          </td>
+
+          <td>{% if u.is_admin %}✅{% else %}—{% endif %}</td>
+
+          <td class="subtle">{{ u.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+
+          <td class="text-end">
+            <form method="POST" action="/admin/users/{{ u.id }}/approve" class="d-inline">
+              <button class="btn btn-sm btn-primary" {% if u.status == "approved" %}disabled{% endif %}>
+                Approve
+              </button>
+            </form>
+
+            <form method="POST" action="/admin/users/{{ u.id }}/block" class="d-inline">
+              <button class="btn btn-sm btn-outline-warning" {% if u.is_admin %}disabled{% endif %}>
+                Block
+              </button>
+            </form>
+
+            <form method="POST" action="/admin/users/{{ u.id }}/delete" class="d-inline"
+                  onsubmit="return confirm('Delete user {{ u.email }}? This cannot be undone.');">
+              <button class="btn btn-sm btn-outline-light" {% if u.is_admin %}disabled{% endif %}>
+                Delete
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+
+    </table>
+  </div>
+</div>
+
+{% endblock %}

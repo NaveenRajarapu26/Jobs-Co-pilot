@@ -4,39 +4,71 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>{{ title or "Agentic Job Apply Copilot" }}</title>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet"/>
+
+  <script>
+    (function () {
+      document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector("form[action*='run']");
+        if (!form) return;
+        form.addEventListener("submit", function () {
+          const btn = document.getElementById("runBtn");
+          const text = document.getElementById("runBtnText");
+          const spinner = document.getElementById("runSpinner");
+          if (btn && text && spinner) {
+            btn.disabled = true;
+            text.textContent = "Running…";
+            spinner.classList.remove("d-none");
+          }
+        });
+      });
+    })();
+  </script>
 </head>
-<script>
-  (function () {
-    const form = document.querySelector("form[action*='run']");
-    if (!form) return;
-    form.addEventListener("submit", function () {
-      const btn = document.getElementById("runBtn");
-      const text = document.getElementById("runBtnText");
-      const spinner = document.getElementById("runSpinner");
-      if (btn && text && spinner) {
-        btn.disabled = true;
-        text.textContent = "Running…";
-        spinner.classList.remove("d-none");
-      }
-    });
-  })();
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 
 <body class="bg-light">
-<nav class="navbar navbar-dark bg-dark">
-  <a class="btn btn-sm btn-outline-light" href="/applications">My Applications</a>
+<nav class="navbar navbar-dark">
+  <div class="container d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-2">
+      <a class="navbar-brand fw-bold" href="{{ url_for('home') }}">Agentic Job Apply Copilot</a>
 
-  <div class="container">
-    <span class="navbar-brand">Agentic Job Apply Copilot</span>
+      <a class="btn btn-sm btn-outline-light" href="{{ url_for('home') }}">Home</a>
+      <a class="btn btn-sm btn-outline-light" href="{{ url_for('about') }}">About</a>
+      <a class="btn btn-sm btn-outline-light" href="{{ url_for('contact') }}">Contact</a>
+
+      {% if session.get("user_id") %}
+        <a class="btn btn-sm btn-outline-light" href="{{ url_for('index') }}">App</a>
+        <a class="btn btn-sm btn-outline-light" href="{{ url_for('applications') }}">My Applications</a>
+
+        {% if session.get("is_admin") %}
+          <a class="btn btn-sm btn-outline-warning" href="{{ url_for('admin_users') }}">Admin</a>
+        {% endif %}
+      {% endif %}
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      {% if session.get("user_email") %}
+        <span class="header-chip">
+          {% if session.get("is_admin") %}
+            Admin
+          {% else %}
+            {{ session.get("user_status", "approved")|capitalize }}
+          {% endif %}
+        </span>
+        <span class="text-light small">{{ session.get("user_email") }}</span>
+        <a class="btn btn-sm btn-outline-warning" href="{{ url_for('logout') }}">Logout</a>
+      {% else %}
+        <a class="btn btn-sm btn-outline-light" href="{{ url_for('login') }}">Login</a>
+        <a class="btn btn-sm btn-light" href="{{ url_for('signup') }}">Sign up</a>
+      {% endif %}
+    </div>
   </div>
 </nav>
 
-<div class="container my-4">
+
+<div class="container page-wrap">
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
       {% for category, msg in messages %}
@@ -47,7 +79,7 @@
 
   {% block content %}{% endblock %}
 </div>
-<a class="btn btn-sm btn-outline-light" href="/applications">My Applications</a>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
