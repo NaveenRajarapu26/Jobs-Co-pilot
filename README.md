@@ -155,7 +155,7 @@ Jobs-Co-pilot/
 
 ## Author
 
-**Naveen Rajarapu** — MS in Artificial Intelligence, Lawrence Technological University (GPA 3.83)
-OPT available from June 2026
+**Naveen Rajarapu** — MS in Artificial Intelligence, Lawrence Technological University 
+
 
 [GitHub](https://github.com/NaveenRajarapu26) · [LinkedIn](https://linkedin.com/in/naveen-rajarapu) · [Live Demo](https://jobs-co-pilot.onrender.com)
