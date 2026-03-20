@@ -2,7 +2,7 @@
 
 > Upload your resume, paste a job description — get a tailored resume, cover letter, ATS fit score, and interview prep in under 60 seconds.
 
-🔗 **Live Demo:** [jobs-co-pilot.onrender.com](https://jobs-co-pilot.onrender.com)
+
 
 ---
 
@@ -153,9 +153,4 @@ Jobs-Co-pilot/
 
 ---
 
-## Author
 
-**Naveen Rajarapu** — MS in Artificial Intelligence, Lawrence Technological University 
-
-
-[GitHub](https://github.com/NaveenRajarapu26) · [LinkedIn](https://linkedin.com/in/naveen-rajarapu) · [Live Demo](https://jobs-co-pilot.onrender.com)
